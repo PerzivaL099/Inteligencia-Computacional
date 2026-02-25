@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción de Estrés ML</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .left-panel {
+            flex: 2;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            text-align: left;
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+
+        p {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 13px;
+            color: #555;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Reference Box Styles */
+        .reference-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .reference-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .reference-table th,
+        .reference-table td {
+            text-align: left;
+            padding: 8px;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .reference-table th {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .badge-low {
+            background: #4CAF50;
+        }
+
+        .badge-med {
+            background: #FFC107;
+            color: #333;
+        }
+
+        .badge-high {
+            background: #F44336;
+        }
+
+        /* Result Styles */
+        .result-card {
+            background: #fff;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            display: none;
+            /* Hidden by default */
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .result-title {
+            font-size: 14px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                border-right: none;
+                padding-right: 0;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 20px;
+            }
+
+            .right-panel {
+                padding-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-container">
+        <!-- LEFT PANEL: INPUT FORM -->
+        <div class="left-panel">
+            <h1>Predicción de Estrés Laboral</h1>
+            <p>Ingresa tus datos demográficos y de hábitos diarios para analizar tu nivel de riesgo.</p>
+
+            <form id="stressForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Edad</label>
+                        <input type="number" id="age" min="18" max="100" value="25">
+                    </div>
+                    <div class="form-group">
+                        <label>Género</label>
+                        <select id="gender">
+                            <option value="Male">Masculino</option>
+                            <option value="Female">Femenino</option>
+                            <option value="Other">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ocupación</label>
+                        <select id="occupation">
+                            <option value="Student">Estudiante</option>
+                            <option value="Professional">Profesional</option>
+                            <option value="Freelancer">Freelancer</option>
+                            <option value="Business Owner">Dueño Negocio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dispositivo Principal</label>
+                        <select id="device">
+                            <option value="Smartphone">Smartphone</option>
+                            <option value="iOS">iOS</option>
+                            <option value="Android">Android</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Horas Teléfono (Diario)</label>
+                        <input type="number" id="dailyPhone" step="0.1" value="4.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Horas Redes Sociales</label>
+                        <input type="number" id="socialMedia" step="0.1" value="2.0">
+                    </div>
+                    <div class="form-group">
+                        <label>Productividad (1-100)</label>
+                        <input type="number" id="productivity" min="1" max="100" value="75">
+                    </div>
+                    <div class="form-group">
+                        <label>Horas de Sueño</label>
+                        <input type="number" id="sleep" step="0.5" value="7.0">
+                    </div>
+                    <div class="form-group">
+                        <label>Apps Usadas</label>
+                        <input type="number" id="apps" value="8">
+                    </div>
+                    <div class="form-group">
+                        <label>Tazas Café</label>
+                        <input type="number" id="caffeine" step="0.5" value="1.0">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Tiempo Pantalla Fin de Semana (Horas)</label>
+                        <input type="number" id="weekendScreen" step="0.5" value="3.5">
+                    </div>
+                </div>
+
+                <button type="button" id="predictBtn" disabled>Analizar Nivel de Estrés</button>
+            </form>
+            <div id="status" style="text-align: center; margin-top: 10px; font-size: 12px; color: #aaa;">Cargando
+                modelo...</div>
+        </div>
+
+        <!-- RIGHT PANEL: DASHBOARD & REFERENCE -->
+        <div class="right-panel">
+            <!-- Result Card -->
+            <div id="result" class="result-card">
+                <div class="result-title">Resultado del Análisis</div>
+                <!-- Content injected by JS -->
+            </div>
+
+            <!-- Reference Table -->
+            <div class="reference-box">
+                <h2>Referencias de Niveles</h2>
+                <p>Rangos basados en escala original (0-10):</p>
+                <table class="reference-table">
+                    <thead>
+                        <tr>
+                            <th>Nivel</th>
+                            <th>Rango Original</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-low">Bajo</span></td>
+                            <td>0 - 3</td>
+                            <td>Relax / Calma</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-med">Medio</span></td>
+                            <td>4 - 6</td>
+                            <td>Alerta / Tensión</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-high">Alto</span></td>
+                            <td>7 - 10</td>
+                            <td>Peligro / Burnout</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
