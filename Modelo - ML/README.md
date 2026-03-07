@@ -11,26 +11,45 @@ Para ejecutar este proyecto de forma manual desde la terminal, necesitas:
 * **Python 3.x** con las librerías: `pandas`, `scikit-learn`, `skl2onnx`, `onnx`.
 * **JDK (Java Development Kit)** instalado y configurado en tus variables de entorno.
 * **Dataset:** El archivo `ai4i2020.csv` ubicado en la raíz del proyecto.
-* **Librería ONNX:** El archivo `onnxruntime-1.24.2.jar` descargado manualmente y colocado en la carpeta `libs/`.
+* **Maven:** Maven instalado y configurado correctamente en tu sistema.
+
 
 ##  Estructura de Carpetas Esperada
 ```text
 Modelo - ML/
 │
-├── libs/
-│   └── onnxruntime-1.24.2.jar
 ├── src/
 │   └── main/
 │       └── java/
-│           ├── MantenimientoPredictivoApp.java
-│           └── MantenimientoPredictivoGUI.java
+│           └── mx/
+│               └── edu/
+│                  └── cetys/
+│                       ├── MantenimientoPredictivoCli.java
+│                       └── MantenimientoPredictivoGui.java
 │
 ├── ai4i2020.csv
 ├── pipeline.py
+├── pom.xml
 └── README.md
+```
 
+## Instrucciones de uso
+
+Entrena el modelo con:
+
+```bash
 python pipeline.py
+```
 
-javac -cp "libs/*" src/main/java/*.java
+Para probar rápidamente, puedes utilizar el CLI de ejemplo (siempre realiza la misma predicción) con el siguiente comando:
 
-java -cp "libs/*;src/main/java" MantenimientoPredictivoGUI
+```bash
+mvn -Pcli
+```
+
+Para ejecutar el GUI interactivo, ejecuta el siguiente comando:
+
+```bash
+mvn -Pgui
+```
+
